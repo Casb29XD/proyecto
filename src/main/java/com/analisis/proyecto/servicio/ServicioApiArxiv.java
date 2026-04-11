@@ -11,6 +11,8 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +29,18 @@ public class ServicioApiArxiv {
     public List<Articulo> descargarArticulos(String busqueda, int limite) {
         List<Articulo> articulos = new ArrayList<>();
         try {
-            String query = busqueda.replace(" ", "+");
-            String url = String.format("http://export.arxiv.org/api/query?search_query=all:%%22%s%%22&start=0&max_results=%d", query, limite);
+            String queryEncoded = URLEncoder.encode("\"" + busqueda + "\"", StandardCharsets.UTF_8);
+            String url = "https://export.arxiv.org/api/query?search_query=all:" + queryEncoded + "&start=0&max_results=" + limite;
+            
+            System.out.println("Consultando arXiv...");
 
             String xmlResponse = webClient.get()
-                    .uri(url)
+                    .uri(URI.create(url))
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
+                    
+
 
             if (xmlResponse != null) {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -42,6 +48,8 @@ public class ServicioApiArxiv {
                 Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes(StandardCharsets.UTF_8)));
 
                 NodeList entryNodes = document.getElementsByTagName("entry");
+
+                
                 for (int i = 0; i < entryNodes.getLength(); i++) {
                     Node node = entryNodes.item(i);
                     if (node.getNodeType() == Node.ELEMENT_NODE) {

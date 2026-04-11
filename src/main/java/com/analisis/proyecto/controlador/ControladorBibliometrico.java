@@ -1,10 +1,14 @@
 package com.analisis.proyecto.controlador;
 
+import com.analisis.proyecto.modelo.Articulo;
 import com.analisis.proyecto.servicio.ServicioGestorReferencias;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bibliometria")
@@ -20,7 +24,12 @@ public class ControladorBibliometrico {
     public String descargarDatos(
             @RequestParam(defaultValue = "generative artificial intelligence") String consulta,
             @RequestParam(defaultValue = "100") int limite) {
-        
+
         return servicioGestorReferencias.ejecutarProcesoDescarga(consulta, limite);
+    }
+
+    @GetMapping("/articulos")
+    public List<Articulo> obtenerArticulos() {
+        return servicioGestorReferencias.obtenerArticulosUnicos();
     }
 }
