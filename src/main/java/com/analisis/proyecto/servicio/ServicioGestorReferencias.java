@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+
 @Service
 public class ServicioGestorReferencias {
 
@@ -18,6 +21,7 @@ public class ServicioGestorReferencias {
     private final ServicioApiSemanticScholar servicioApiSemanticScholar;
     private final RepositorioArticulo repositorioArticulo;
     private final RepositorioArticuloDuplicado repositorioArticuloDuplicado;
+    private final ObjectMapper objectMapper;
 
     public ServicioGestorReferencias(ServicioApiArxiv servicioApiArxiv,
                                      ServicioApiSemanticScholar servicioApiSemanticScholar,
@@ -27,6 +31,7 @@ public class ServicioGestorReferencias {
         this.servicioApiSemanticScholar = servicioApiSemanticScholar;
         this.repositorioArticulo = repositorioArticulo;
         this.repositorioArticuloDuplicado = repositorioArticuloDuplicado;
+        this.objectMapper = new ObjectMapper();
     }
 
     public String ejecutarProcesoDescarga(String consulta, int limite) {
@@ -66,6 +71,17 @@ public class ServicioGestorReferencias {
             procesados++;
         }
 
-        return String.format("Se procesaron %d artículos en total. Se guardaron %d artículos únicos y se encontraron %d duplicados.", procesados, unicosGuardados, duplicadosEncontrados);
+        try {
+            List<Articulo> todosUnicos = repositorioArticulo.findAll();
+            List<ArticuloDuplicado> todosDuplicados = repositorioArticuloDuplicado.findAll();
+            
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File("articulos_unificados.json"), todosUnicos);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File("articulos_duplicados.json"), todosDuplicados);
+            System.out.println("Archivos generados exitosamente en la raíz del proyecto.");
+        } catch (Exception e) {
+            System.err.println("Error al generar los archivos JSON: " + e.getMessage());
+        }
+
+        return String.format("Se procesaron %d artículos en total. Se guardaron %d artículos únicos nuevos y se encontraron %d duplicados. Archivos articulos_unificados.json y articulos_duplicados.json generados con todo el registro histórico.", procesados, unicosGuardados, duplicadosEncontrados);
     }
 }
