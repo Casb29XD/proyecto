@@ -68,7 +68,8 @@ public class ServicioApiArxiv {
                         // arXiv no devuelve siempre keywords de manera fácil, usamos lista vacía
                         List<String> palabrasClave = new ArrayList<>();
 
-                        Articulo articulo = new Articulo(titulo, autores, resumen, palabrasClave, "arXiv");
+                        Articulo articulo = new Articulo(titulo, autores, resumen, 0, "", "");
+                        articulo.setOrigen("arXiv");
                         articulos.add(articulo);
                     }
                 }

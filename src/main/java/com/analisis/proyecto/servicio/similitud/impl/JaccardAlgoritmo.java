@@ -1,0 +1,31 @@
+package com.analisis.proyecto.servicio.similitud.impl;
+
+import com.analisis.proyecto.servicio.similitud.SimilitudAlgoritmo;
+import org.apache.commons.text.similarity.JaccardSimilarity;
+import org.springframework.stereotype.Component;
+
+/**
+ * Implementación de la Similitud de Jaccard.
+ * Mide el tamaño de la intersección dividido por el tamaño de la unión de dos conjuntos de caracteres.
+ */
+@Component
+public class JaccardAlgoritmo implements SimilitudAlgoritmo {
+
+    private final JaccardSimilarity similarity = new JaccardSimilarity();
+
+    @Override
+    public double calcularSimilitud(String source, String target) {
+        if (source == null || target == null) return 0.0;
+        return similarity.apply(source, target);
+    }
+
+    @Override
+    public String getNombreAlgoritmo() {
+        return "Similitud de Jaccard";
+    }
+
+    @Override
+    public String getExplicacion() {
+        return "Compara la proporción de caracteres compartidos entre dos textos sobre el total de caracteres únicos en ambos.";
+    }
+}

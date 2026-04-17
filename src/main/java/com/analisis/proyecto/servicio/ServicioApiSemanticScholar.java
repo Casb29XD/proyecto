@@ -56,7 +56,8 @@ public class ServicioApiSemanticScholar {
 
                             List<String> palabrasClave = new ArrayList<>();
 
-                            Articulo articulo = new Articulo(titulo, autores, resumen, palabrasClave, "Semantic Scholar");
+                            Articulo articulo = new Articulo(titulo, autores, resumen, 0, "", "");
+                            articulo.setOrigen("Semantic Scholar");
                             articulos.add(articulo);
                         }
                     }
