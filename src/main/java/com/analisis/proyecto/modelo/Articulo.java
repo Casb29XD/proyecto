@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * Entidad que representa un artículo científico en el contexto de la bibliometría.
  */
-@Document(collection = "articulos_unicos")
+@Document(collection = "articulos")
 public class Articulo {
 
     @Id

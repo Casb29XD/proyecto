@@ -3,7 +3,7 @@ package com.analisis.proyecto.modelo;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "articulos_duplicados")
+@Document(collection = "articulosduplicados")
 public class ArticuloDuplicado {
 
     @Id
