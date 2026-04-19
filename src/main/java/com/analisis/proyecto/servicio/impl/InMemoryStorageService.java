@@ -26,8 +26,8 @@ public class InMemoryStorageService implements StorageService {
         for (Articulo nuevo : articulos) {
             // Evitar duplicados simples en memoria por DOI o Título
             boolean existe = baseDeDatosMemoria.stream()
-                    .anyMatch(a -> (a.getDoi() != null && a.getDoi().equalsIgnoreCase(nuevo.getDoi())) ||
-                                   a.getTitulo().equalsIgnoreCase(nuevo.getTitulo()));
+                    .anyMatch(a -> (a.getDoi() != null && !a.getDoi().isEmpty() && a.getDoi().equalsIgnoreCase(nuevo.getDoi())) ||
+                                   (a.getTitulo() != null && a.getTitulo().equalsIgnoreCase(nuevo.getTitulo())));
             if (!existe) {
                 baseDeDatosMemoria.add(nuevo);
             }

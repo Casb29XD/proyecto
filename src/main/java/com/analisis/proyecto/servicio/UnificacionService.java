@@ -45,6 +45,20 @@ public class UnificacionService {
         return deduplicar(todosLosArticulos);
     }
 
+    /**
+     * Procesa múltiples listas de artículos obtenidas (ej: desde APIs) y las unifica.
+     */
+    @SafeVarargs
+    public final ResultadoUnificacion unificarListas(List<Articulo>... listas) {
+        List<Articulo> todos = new ArrayList<>();
+        for (List<Articulo> lista : listas) {
+            if (lista != null) {
+                todos.addAll(lista);
+            }
+        }
+        return deduplicar(todos);
+    }
+
     private ResultadoUnificacion deduplicar(List<Articulo> articulos) {
         List<Articulo> unificados = new ArrayList<>();
         List<Articulo> eliminados = new ArrayList<>();

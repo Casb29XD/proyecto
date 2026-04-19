@@ -12,6 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -58,6 +64,32 @@ public class StorageManager {
         inMemoryStorage.guardarTodos(articulos);
     }
 
+    @EventListener(ApplicationReadyEvent.class)
+    public void inicializarDatos() {
+        checkConnectionLazily();
+        List<Articulo> actuales = listarTodos();
+        if (actuales == null || actuales.isEmpty()) {
+            logger.info("La base de datos está vacía. Intentando cargar datos de articulos_unificados.json automáticamente...");
+            try {
+                File archivoJson = new File("articulos_unificados.json");
+                if (archivoJson.exists()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<Articulo> articulos = mapper.readValue(archivoJson, new TypeReference<List<Articulo>>() {});
+                    if (!articulos.isEmpty()) {
+                        guardar(articulos);
+                        logger.info("Se han cargado {} artículos iniciales exitosamente.", articulos.size());
+                    }
+                } else {
+                    logger.warn("El archivo articulos_unificados.json no existe en el directorio principal.");
+                }
+            } catch (Exception e) {
+                logger.error("No se pudo cargar articulos_unificados.json automáticamente.", e);
+            }
+        } else {
+            logger.info("La base de datos ya contiene {} artículos. Omitiendo carga automática.", actuales.size());
+        }
+    }
+
     public List<Articulo> listarTodos() {
         checkConnectionLazily();
         if (!useFallback) {
@@ -87,6 +119,11 @@ public class StorageManager {
     public String getMode() {
         if (useFallback == null) return "Verificando...";
         return useFallback ? "Offline (In-Memory)" : "Online (MongoDB Atlas)";
+    }
+
+    public boolean isUseFallback() {
+        checkConnectionLazily();
+        return useFallback != null && useFallback;
     }
 
     // --- Nuevas funcionalidades ---
