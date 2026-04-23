@@ -12,6 +12,7 @@ import com.analisis.proyecto.servicio.ServicioApiSemanticScholar;
 import com.analisis.proyecto.servicio.StorageManager;
 import com.analisis.proyecto.servicio.UnificacionService;
 import com.analisis.proyecto.servicio.AgrupamientoJerarquicoService;
+import com.analisis.proyecto.servicio.VisualizacionService;
 import com.analisis.proyecto.servicio.impl.MongoStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,6 +47,7 @@ public class BibliometriaController {
     private final ServicioApiArxiv apiArxiv;
     private final ServicioApiSemanticScholar apiSemantic;
     private final AgrupamientoJerarquicoService agrupamientoService;
+    private final VisualizacionService visualizacionService;
 
     public BibliometriaController(UnificacionService unificacionService,
                                   AnalisisSimilitudService analisisSimilitudService,
@@ -55,7 +57,8 @@ public class BibliometriaController {
                                   MineriaTextoService mineriaTextoService,
                                   ServicioApiArxiv apiArxiv,
                                   ServicioApiSemanticScholar apiSemantic,
-                                  AgrupamientoJerarquicoService agrupamientoService) {
+                                  AgrupamientoJerarquicoService agrupamientoService,
+                                  VisualizacionService visualizacionService) {
         this.unificacionService = unificacionService;
         this.analisisSimilitudService = analisisSimilitudService;
         this.storageManager = storageManager;
@@ -65,6 +68,7 @@ public class BibliometriaController {
         this.apiArxiv = apiArxiv;
         this.apiSemantic = apiSemantic;
         this.agrupamientoService = agrupamientoService;
+        this.visualizacionService = visualizacionService;
     }
 
     /**
@@ -280,5 +284,11 @@ public class BibliometriaController {
         }
         
         return ResponseEntity.ok(agrupamientoService.agrupar(sublist, request.getLinkage(), request.getMetric()));
+    }
+
+    // --- Visualización (Requerimiento 5) ---
+    @GetMapping("/visualizacion")
+    public ResponseEntity<com.analisis.proyecto.modelo.VisualizacionResponse> obtenerDatosVisualizacion() {
+        return ResponseEntity.ok(visualizacionService.obtenerDatosVisualizacion());
     }
 }
