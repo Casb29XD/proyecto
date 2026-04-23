@@ -29,6 +29,9 @@ public class InMemoryStorageService implements StorageService {
                     .anyMatch(a -> (a.getDoi() != null && !a.getDoi().isEmpty() && a.getDoi().equalsIgnoreCase(nuevo.getDoi())) ||
                                    (a.getTitulo() != null && a.getTitulo().equalsIgnoreCase(nuevo.getTitulo())));
             if (!existe) {
+                if (nuevo.getId() == null || nuevo.getId().isEmpty()) {
+                    nuevo.setId(java.util.UUID.randomUUID().toString());
+                }
                 baseDeDatosMemoria.add(nuevo);
             }
         }
@@ -49,6 +52,13 @@ public class InMemoryStorageService implements StorageService {
                 : new ArrayList<>();
                 
         return new PageImpl<>(subList, pageable, baseDeDatosMemoria.size());
+    }
+
+    @Override
+    public java.util.Optional<Articulo> obtenerPorId(String id) {
+        return baseDeDatosMemoria.stream()
+                .filter(a -> id.equals(a.getId()))
+                .findFirst();
     }
 
     @Override

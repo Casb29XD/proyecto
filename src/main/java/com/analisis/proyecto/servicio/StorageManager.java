@@ -116,6 +116,19 @@ public class StorageManager {
         return inMemoryStorage.obtenerPaginados(pageable);
     }
 
+    public java.util.Optional<Articulo> obtenerPorId(String id) {
+        checkConnectionLazily();
+        if (!useFallback) {
+            try {
+                return mongoStorage.obtenerPorId(id);
+            } catch (Exception e) {
+                logger.warn("Fallo en lectura de MongoDB al buscar por id. Cambiando a Fallback.");
+                useFallback = true;
+            }
+        }
+        return inMemoryStorage.obtenerPorId(id);
+    }
+
     public String getMode() {
         if (useFallback == null) return "Verificando...";
         return useFallback ? "Offline (In-Memory)" : "Online (MongoDB Atlas)";

@@ -24,6 +24,7 @@ public class AnalisisSimilitudService {
     public record ResultadoComparacion(
             String idArticuloTarget,
             String tituloTarget,
+            String resumenTarget,
             Map<String, Double> puntajesPorAlgoritmo
     ) {}
 
@@ -46,6 +47,7 @@ public class AnalisisSimilitudService {
             resultados.add(new ResultadoComparacion(
                     candidato.getId(),
                     candidato.getTitulo(),
+                    candidato.getResumen(),
                     puntajes
             ));
         }

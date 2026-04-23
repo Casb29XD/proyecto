@@ -11,6 +11,7 @@ import com.analisis.proyecto.servicio.ServicioApiArxiv;
 import com.analisis.proyecto.servicio.ServicioApiSemanticScholar;
 import com.analisis.proyecto.servicio.StorageManager;
 import com.analisis.proyecto.servicio.UnificacionService;
+import com.analisis.proyecto.servicio.AgrupamientoJerarquicoService;
 import com.analisis.proyecto.servicio.impl.MongoStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -44,6 +45,7 @@ public class BibliometriaController {
     private final MineriaTextoService mineriaTextoService;
     private final ServicioApiArxiv apiArxiv;
     private final ServicioApiSemanticScholar apiSemantic;
+    private final AgrupamientoJerarquicoService agrupamientoService;
 
     public BibliometriaController(UnificacionService unificacionService,
                                   AnalisisSimilitudService analisisSimilitudService,
@@ -52,7 +54,8 @@ public class BibliometriaController {
                                   ArticuloSearchService articuloSearchService,
                                   MineriaTextoService mineriaTextoService,
                                   ServicioApiArxiv apiArxiv,
-                                  ServicioApiSemanticScholar apiSemantic) {
+                                  ServicioApiSemanticScholar apiSemantic,
+                                  AgrupamientoJerarquicoService agrupamientoService) {
         this.unificacionService = unificacionService;
         this.analisisSimilitudService = analisisSimilitudService;
         this.storageManager = storageManager;
@@ -61,6 +64,7 @@ public class BibliometriaController {
         this.mineriaTextoService = mineriaTextoService;
         this.apiArxiv = apiArxiv;
         this.apiSemantic = apiSemantic;
+        this.agrupamientoService = agrupamientoService;
     }
 
     /**
@@ -235,5 +239,46 @@ public class BibliometriaController {
         // Ejecutamos minería sobre toda la base de datos unificada
         List<com.analisis.proyecto.modelo.Articulo> todos = storageManager.listarTodos();
         return mineriaTextoService.analizarFrecuencias(todos);
+    }
+
+    @GetMapping("/mineria/frecuencias/{articuloId}")
+    public ResponseEntity<MineriaTextoService.ResultadoMineria> extraerFrecuenciasPorArticulo(@PathVariable String articuloId) {
+        return storageManager.obtenerPorId(articuloId)
+                .map(articulo -> ResponseEntity.ok(mineriaTextoService.analizarFrecuenciasDocumento(articulo)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public static class AgrupamientoRequest {
+        private List<String> ids;
+        private String linkage;
+        private String metric;
+
+        public List<String> getIds() { return ids; }
+        public void setIds(List<String> ids) { this.ids = ids; }
+        public String getLinkage() { return linkage; }
+        public void setLinkage(String linkage) { this.linkage = linkage; }
+        public String getMetric() { return metric; }
+        public void setMetric(String metric) { this.metric = metric; }
+    }
+
+    // --- Clustering Jerárquico (Requerimiento 4) ---
+    @PostMapping("/agrupamiento")
+    public ResponseEntity<com.analisis.proyecto.modelo.ClusterNode> obtenerAgrupamiento(
+            @RequestBody AgrupamientoRequest request) {
+        
+        List<Articulo> todos = storageManager.listarTodos();
+        if (todos.isEmpty() || request.getIds() == null || request.getIds().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        List<Articulo> sublist = todos.stream()
+                .filter(a -> request.getIds().contains(a.getId()))
+                .toList();
+                
+        if (sublist.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        return ResponseEntity.ok(agrupamientoService.agrupar(sublist, request.getLinkage(), request.getMetric()));
     }
 }

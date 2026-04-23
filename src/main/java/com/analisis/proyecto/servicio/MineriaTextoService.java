@@ -158,6 +158,71 @@ public class MineriaTextoService {
         return new ResultadoMineria(topBase, topNuevas);
     }
 
+    public ResultadoMineria analizarFrecuenciasDocumento(Articulo articulo) {
+        if (articulo == null || articulo.getResumen() == null || articulo.getResumen().trim().isEmpty()) {
+            return new ResultadoMineria(new ArrayList<>(), new ArrayList<>());
+        }
+
+        Map<String, Integer> freqBase = new HashMap<>();
+        Map<String, Integer> freqNuevos = new HashMap<>();
+        Map<String, Integer> coOcurrencias = new HashMap<>();
+
+        for (String c : CATEGORIA_BASE) {
+            freqBase.put(c, 0);
+        }
+
+        String text = articulo.getResumen().toLowerCase();
+        boolean contieneAlgunaBase = false;
+        
+        for (String baseWord : CATEGORIA_BASE) {
+            int matchesCount = text.split("\\b" + java.util.regex.Pattern.quote(baseWord) + "\\b").length - 1;
+            if (matchesCount > 0) {
+                freqBase.put(baseWord, freqBase.get(baseWord) + matchesCount);
+                contieneAlgunaBase = true;
+            }
+        }
+
+        String cleanedText = text.replaceAll("[^a-z\\s-]", " ");
+        String[] tokens = cleanedText.split("\\s+");
+        Set<String> tokensUnicos = new HashSet<>();
+
+        for (String token : tokens) {
+            token = token.trim();
+            if (token.length() > 4 && !STOP_WORDS.contains(token) && !esCombinacionEnBase(token)) {
+                freqNuevos.put(token, freqNuevos.getOrDefault(token, 0) + 1);
+                tokensUnicos.add(token);
+            }
+        }
+
+        if (contieneAlgunaBase) {
+            for (String t : tokensUnicos) {
+                coOcurrencias.put(t, coOcurrencias.getOrDefault(t, 0) + 1);
+            }
+        }
+
+        List<PalabraFrecuencia> topBase = freqBase.entrySet().stream()
+            .map(e -> new PalabraFrecuencia(e.getKey(), e.getValue()))
+            .sorted((a, b) -> Integer.compare(b.frecuencia(), a.frecuencia()))
+            .collect(Collectors.toList());
+
+        List<PalabraDescubierta> topNuevas = freqNuevos.entrySet().stream()
+            .filter(e -> e.getValue() >= 1) // En un solo documento, 1 aparición es válida
+            .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+            .limit(100)
+            .map(e -> {
+                String word = e.getKey();
+                int freqTotal = e.getValue();
+                int vecesCoocurre = coOcurrencias.getOrDefault(word, 0);
+                double precision = freqTotal > 0 ? (double) vecesCoocurre / freqTotal : 0.0;
+                return new PalabraDescubierta(word, freqTotal, Math.round(precision * 1000.0) / 1000.0);
+            })
+            .sorted((a, b) -> Double.compare(b.precision() * b.frecuencia(), a.precision() * a.frecuencia()))
+            .limit(15)
+            .collect(Collectors.toList());
+
+        return new ResultadoMineria(topBase, topNuevas);
+    }
+
     private boolean esCombinacionEnBase(String token) {
         for (String c : CATEGORIA_BASE) {
             if (c.contains(token)) return true;

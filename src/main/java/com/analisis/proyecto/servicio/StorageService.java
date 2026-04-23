@@ -14,5 +14,6 @@ public interface StorageService {
     void guardarTodos(List<Articulo> articulos);
     List<Articulo> obtenerTodos();
     Page<Articulo> obtenerPaginados(Pageable pageable);
+    java.util.Optional<Articulo> obtenerPorId(String id);
     boolean estaDisponible();
 }

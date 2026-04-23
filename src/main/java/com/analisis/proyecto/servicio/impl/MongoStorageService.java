@@ -52,6 +52,11 @@ public class MongoStorageService implements StorageService {
     }
 
     @Override
+    public java.util.Optional<Articulo> obtenerPorId(String id) {
+        return repositorioArticulo.findById(id);
+    }
+
+    @Override
     public boolean estaDisponible() {
         try {
             // Un chequeo simple para ver si MongoDB responde
