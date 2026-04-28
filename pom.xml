@@ -92,6 +92,12 @@
             <artifactId>opencsv</artifactId>
             <version>5.7.1</version>
         </dependency>
+
+        <!-- Actuator: expone /actuator/health para el healthcheck de Docker -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
