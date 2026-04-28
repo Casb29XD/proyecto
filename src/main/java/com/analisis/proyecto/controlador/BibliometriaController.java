@@ -79,21 +79,27 @@ public class BibliometriaController {
             @RequestParam(defaultValue = "generative artificial intelligence") String query) {
         
         logger.info("Iniciando extracción automática para: {}", query);
-        // Descargar de ArXiv y Semantic Scholar (límite razonable 50 para no hacer timeout y cumplir la métrica local)
         List<Articulo> arxivDocs = apiArxiv.descargarArticulos(query, 50);
         List<Articulo> semanticDocs = apiSemantic.descargarArticulos(query, 50);
         
-        // Unificar, deduplicar
-        UnificacionService.ResultadoUnificacion resultado = unificacionService.unificarListas(arxivDocs, semanticDocs);
+        List<Articulo> baseDeDatos = storageManager.listarTodos();
         
-        // Guardar persistente
-        storageManager.guardar(resultado.unificados());
+        // Unificar, deduplicar contra los existentes
+        UnificacionService.ResultadoUnificacion resultado = unificacionService.unificarListas(baseDeDatos, arxivDocs, semanticDocs);
+        
+        // Extraer los nuevos que no estaban en la base de datos
+        List<Articulo> nuevosUnificados = resultado.unificados().stream()
+                .filter(art -> !baseDeDatos.contains(art))
+                .toList();
+
+        // Guardar persistente solo los nuevos
+        storageManager.guardar(nuevosUnificados);
         List<ArticuloDuplicado> duplicadosMapeados = resultado.eliminados().stream()
                 .map(art -> new ArticuloDuplicado(art, "Duplicado tras automatización API"))
                 .toList();
         storageManager.guardarDuplicados(duplicadosMapeados);
         
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(new UnificacionService.ResultadoUnificacion(nuevosUnificados, resultado.eliminados()));
     }
 
     /**
@@ -103,18 +109,29 @@ public class BibliometriaController {
     public ResponseEntity<UnificacionService.ResultadoUnificacion> cargarArchivos(
             @RequestParam("archivos") List<MultipartFile> archivos) throws IOException {
         
-        UnificacionService.ResultadoUnificacion resultado = unificacionService.unificarArchivos(archivos);
+        List<Articulo> baseDeDatos = storageManager.listarTodos();
+        UnificacionService.ResultadoUnificacion resultadoTemporal = unificacionService.unificarArchivos(archivos);
+        UnificacionService.ResultadoUnificacion resultado = unificacionService.unificarListas(baseDeDatos, resultadoTemporal.unificados());
         
-        // Guardamos los artículos únicos
-        storageManager.guardar(resultado.unificados());
+        // Extraer los nuevos que no estaban en la base de datos
+        List<Articulo> nuevosUnificados = resultado.unificados().stream()
+                .filter(art -> !baseDeDatos.contains(art))
+                .toList();
+
+        // Guardamos los artículos únicos nuevos
+        storageManager.guardar(nuevosUnificados);
         
+        // Unimos los eliminados del archivo internamente + los eliminados contra la BD
+        List<Articulo> todosEliminados = new java.util.ArrayList<>(resultadoTemporal.eliminados());
+        todosEliminados.addAll(resultado.eliminados());
+
         // Guardamos los que fueron eliminados como duplicados en la colección correspondiente
-        List<ArticuloDuplicado> duplicadosMapeados = resultado.eliminados().stream()
+        List<ArticuloDuplicado> duplicadosMapeados = todosEliminados.stream()
                 .map(art -> new ArticuloDuplicado(art, "Duplicado por título/DOI"))
                 .toList();
         storageManager.guardarDuplicados(duplicadosMapeados);
         
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok(new UnificacionService.ResultadoUnificacion(nuevosUnificados, todosEliminados));
     }
 
     /**
@@ -221,8 +238,7 @@ public class BibliometriaController {
 
     @GetMapping(value = "/exportar/eliminados", produces = "text/csv; charset=utf-8")
     public ResponseEntity<String> exportarEliminados() {
-        List<com.analisis.proyecto.modelo.ArticuloDuplicado> eliminados = storageManager.isUseFallback() ? 
-            new java.util.ArrayList<>() : ((com.analisis.proyecto.servicio.impl.MongoStorageService) mongoStorage).obtenerDuplicados();
+        List<com.analisis.proyecto.modelo.ArticuloDuplicado> eliminados = storageManager.obtenerDuplicados();
             
         StringBuilder csv = new StringBuilder("Titulo;Origen;Motivo\n");
         for(com.analisis.proyecto.modelo.ArticuloDuplicado a : eliminados) {
@@ -235,6 +251,11 @@ public class BibliometriaController {
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename=\"articulos_repetidos_eliminados.csv\"")
             .body(csv.toString());
+    }
+
+    @GetMapping("/duplicados")
+    public List<com.analisis.proyecto.modelo.ArticuloDuplicado> obtenerDuplicados() {
+        return storageManager.obtenerDuplicados();
     }
 
     // --- Minería de Textos (Requerimiento 3) ---
@@ -284,6 +305,26 @@ public class BibliometriaController {
         }
         
         return ResponseEntity.ok(agrupamientoService.agrupar(sublist, request.getLinkage(), request.getMetric()));
+    }
+
+    @PostMapping("/agrupamiento/comparar")
+    public ResponseEntity<List<com.analisis.proyecto.servicio.AgrupamientoJerarquicoService.ComparacionMetodo>> compararMetodos(
+            @RequestBody AgrupamientoRequest request) {
+        
+        List<Articulo> todos = storageManager.listarTodos();
+        if (todos.isEmpty() || request.getIds() == null || request.getIds().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        List<Articulo> sublist = todos.stream()
+                .filter(a -> request.getIds().contains(a.getId()))
+                .toList();
+                
+        if (sublist.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        return ResponseEntity.ok(agrupamientoService.compararMetodos(sublist, request.getMetric()));
     }
 
     // --- Visualización (Requerimiento 5) ---

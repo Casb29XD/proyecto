@@ -1,10 +1,32 @@
 version: '3.8'
+
 services:
+  # Backend Spring Boot (Java 17)
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: ${MONGODB_URI}
     env_file:
       - .env
-    volumes:
-      - ./:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app.jar", "-Dloader.main=org.springframework.boot.loader.tools.MainClassFinder", "org.springframework.boot.loader.tools.MainClassFinder"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend React (Vite + Nginx)
+  frontend:
+    build:
+      context: ./doc-central-app
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    restart: unless-stopped

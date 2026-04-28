@@ -146,10 +146,26 @@ public class StorageManager {
         if (!useFallback) {
             try {
                 mongoStorage.guardarDuplicados(duplicados);
+                return;
             } catch (Exception e) {
                 logger.error("Error al guardar duplicados en MongoDB", e);
+                useFallback = true;
             }
         }
+        inMemoryStorage.guardarDuplicados(duplicados);
+    }
+
+    public List<ArticuloDuplicado> obtenerDuplicados() {
+        checkConnectionLazily();
+        if (!useFallback) {
+            try {
+                return mongoStorage.obtenerDuplicados();
+            } catch (Exception e) {
+                logger.warn("Error al listar duplicados en MongoDB", e);
+                useFallback = true;
+            }
+        }
+        return inMemoryStorage.obtenerDuplicados();
     }
 
     public void registrarBusqueda(String titulo, int resultados) {

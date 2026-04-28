@@ -1,6 +1,7 @@
 package com.analisis.proyecto.servicio.impl;
 
 import com.analisis.proyecto.modelo.Articulo;
+import com.analisis.proyecto.modelo.ArticuloDuplicado;
 import com.analisis.proyecto.servicio.StorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class InMemoryStorageService implements StorageService {
 
     private static final List<Articulo> baseDeDatosMemoria = Collections.synchronizedList(new ArrayList<>());
+    private static final List<ArticuloDuplicado> duplicadosMemoria = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void guardarTodos(List<Articulo> articulos) {
@@ -64,5 +66,13 @@ public class InMemoryStorageService implements StorageService {
     @Override
     public boolean estaDisponible() {
         return true; // La memoria siempre está disponible
+    }
+
+    public void guardarDuplicados(List<ArticuloDuplicado> duplicados) {
+        duplicadosMemoria.addAll(duplicados);
+    }
+
+    public List<ArticuloDuplicado> obtenerDuplicados() {
+        return new ArrayList<>(duplicadosMemoria);
     }
 }

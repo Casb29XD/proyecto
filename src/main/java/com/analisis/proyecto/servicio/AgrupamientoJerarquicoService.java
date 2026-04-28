@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class AgrupamientoJerarquicoService {
@@ -123,5 +125,77 @@ public class AgrupamientoJerarquicoService {
         }
 
         return activeClusters.get(0);
+    }
+
+    public static class ComparacionMetodo {
+        private String metodo;
+        private double score;
+        private String descripcion;
+
+        public ComparacionMetodo(String metodo, double score, String descripcion) {
+            this.metodo = metodo;
+            this.score = score;
+            this.descripcion = descripcion;
+        }
+
+        public String getMetodo() { return metodo; }
+        public double getScore() { return score; }
+        public String getDescripcion() { return descripcion; }
+    }
+
+    public List<ComparacionMetodo> compararMetodos(List<Articulo> articulos, String metricName) {
+        List<ComparacionMetodo> comparacion = new ArrayList<>();
+        
+        if (articulos == null || articulos.size() < 2) {
+            return comparacion;
+        }
+
+        String[] metodos = {"single", "average", "complete"};
+        
+        for (String metodo : metodos) {
+            ClusterNode root = agrupar(articulos, metodo, metricName);
+            double score = calcularCohesion(root);
+            
+            String desc = "";
+            if (metodo.equals("single")) desc = "Propenso a efecto cadena (chaining). Une por similitud máxima local.";
+            if (metodo.equals("average")) desc = "Balanceado. Considera la estructura global del clúster (UPGMA).";
+            if (metodo.equals("complete")) desc = "Fuerza clústeres esféricos y compactos. Une por similitud mínima.";
+            
+            comparacion.add(new ComparacionMetodo(metodo, score, desc));
+        }
+        
+        // Normalizar scores para que el mejor sea 100% y los demás proporcionales
+        double maxScore = comparacion.stream().mapToDouble(ComparacionMetodo::getScore).max().orElse(1.0);
+        if (maxScore == 0) maxScore = 1.0;
+        
+        for (ComparacionMetodo c : comparacion) {
+            c.score = Math.round((c.score / maxScore) * 100.0 * 10.0) / 10.0;
+        }
+
+        return comparacion;
+    }
+
+    private double calcularCohesion(ClusterNode node) {
+        if (node == null || node.isLeaf()) return 0.0;
+        
+        List<Double> distancias = new ArrayList<>();
+        recolectarDistancias(node, distancias);
+        
+        if (distancias.isEmpty()) return 0.0;
+        
+        // Una menor distancia promedio de fusión significa clústeres más densos/cohesivos
+        double sum = 0;
+        for (Double d : distancias) sum += d;
+        double avgDist = sum / distancias.size();
+        
+        // Transformar distancia en "score de cohesión" (mayor es mejor)
+        return Math.max(0.0, 1.0 - avgDist);
+    }
+    
+    private void recolectarDistancias(ClusterNode node, List<Double> distancias) {
+        if (node == null || node.isLeaf()) return;
+        distancias.add(node.getDistance());
+        recolectarDistancias(node.getLeft(), distancias);
+        recolectarDistancias(node.getRight(), distancias);
     }
 }
