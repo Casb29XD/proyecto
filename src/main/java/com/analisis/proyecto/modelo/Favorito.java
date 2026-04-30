@@ -12,6 +12,7 @@ public class Favorito {
 
     @Id
     private String id;
+    private String usuarioId;
     private String articuloId;
     private String titulo;
     private LocalDateTime fechaAgregado;
@@ -29,6 +30,9 @@ public class Favorito {
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(String usuarioId) { this.usuarioId = usuarioId; }
 
     public String getArticuloId() { return articuloId; }
     public void setArticuloId(String articuloId) { this.articuloId = articuloId; }

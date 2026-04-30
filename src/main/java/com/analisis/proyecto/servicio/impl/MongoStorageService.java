@@ -81,8 +81,8 @@ public class MongoStorageService implements StorageService {
         repositorioHistorial.save(historial);
     }
 
-    public List<HistorialBusqueda> obtenerHistorial() {
-        return repositorioHistorial.findAll();
+    public List<HistorialBusqueda> obtenerHistorial(String usuarioId) {
+        return repositorioHistorial.findByUsuarioIdOrderByFechaDesc(usuarioId);
     }
 
     // Métodos para Favoritos
@@ -90,11 +90,11 @@ public class MongoStorageService implements StorageService {
         repositorioFavorito.save(favorito);
     }
 
-    public void eliminarFavorito(String articuloId) {
-        repositorioFavorito.findByArticuloId(articuloId).ifPresent(repositorioFavorito::delete);
+    public void eliminarFavorito(String usuarioId, String articuloId) {
+        repositorioFavorito.findByUsuarioIdAndArticuloId(usuarioId, articuloId).ifPresent(repositorioFavorito::delete);
     }
 
-    public List<Favorito> obtenerFavoritos() {
-        return repositorioFavorito.findAll();
+    public List<Favorito> obtenerFavoritos(String usuarioId) {
+        return repositorioFavorito.findByUsuarioId(usuarioId);
     }
 }

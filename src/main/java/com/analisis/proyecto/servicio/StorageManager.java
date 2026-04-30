@@ -168,46 +168,62 @@ public class StorageManager {
         return inMemoryStorage.obtenerDuplicados();
     }
 
-    public void registrarBusqueda(String titulo, int resultados) {
+    public void registrarBusqueda(String usuarioId, String titulo, int resultados) {
         checkConnectionLazily();
         if (!useFallback) {
             try {
-                mongoStorage.registrarBusqueda(new HistorialBusqueda(titulo, resultados));
+                HistorialBusqueda historial = new HistorialBusqueda(titulo, resultados);
+                historial.setUsuarioId(usuarioId);
+                mongoStorage.registrarBusqueda(historial);
             } catch (Exception e) {
                 logger.error("Error al registrar búsqueda en MongoDB", e);
             }
         }
     }
 
-    public void agregarFavorito(Articulo articulo) {
+    public void agregarFavorito(String usuarioId, Articulo articulo) {
         checkConnectionLazily();
         if (!useFallback) {
             try {
-                mongoStorage.guardarFavorito(new Favorito(articulo));
+                Favorito fav = new Favorito(articulo);
+                fav.setUsuarioId(usuarioId);
+                mongoStorage.guardarFavorito(fav);
             } catch (Exception e) {
                 logger.error("Error al agregar favorito en MongoDB", e);
             }
         }
     }
 
-    public void quitarFavorito(String articuloId) {
+    public void quitarFavorito(String usuarioId, String articuloId) {
         checkConnectionLazily();
         if (!useFallback) {
             try {
-                mongoStorage.eliminarFavorito(articuloId);
+                mongoStorage.eliminarFavorito(usuarioId, articuloId);
             } catch (Exception e) {
                 logger.error("Error al quitar favorito en MongoDB", e);
             }
         }
     }
 
-    public List<Favorito> listarFavoritos() {
+    public List<Favorito> listarFavoritos(String usuarioId) {
         checkConnectionLazily();
         if (!useFallback) {
             try {
-                return mongoStorage.obtenerFavoritos();
+                return mongoStorage.obtenerFavoritos(usuarioId);
             } catch (Exception e) {
                 logger.error("Error al listar favoritos en MongoDB", e);
+            }
+        }
+        return List.of();
+    }
+
+    public List<HistorialBusqueda> listarHistorial(String usuarioId) {
+        checkConnectionLazily();
+        if (!useFallback) {
+            try {
+                return mongoStorage.obtenerHistorial(usuarioId);
+            } catch (Exception e) {
+                logger.error("Error al listar historial en MongoDB", e);
             }
         }
         return List.of();

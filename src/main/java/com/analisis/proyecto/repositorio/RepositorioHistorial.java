@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RepositorioHistorial extends MongoRepository<HistorialBusqueda, String> {
+    java.util.List<HistorialBusqueda> findByUsuarioIdOrderByFechaDesc(String usuarioId);
 }

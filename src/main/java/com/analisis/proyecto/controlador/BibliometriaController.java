@@ -139,6 +139,7 @@ public class BibliometriaController {
      */
     @PostMapping("/analizar-similitud")
     public ResponseEntity<List<AnalisisSimilitudService.ResultadoComparacion>> analizarSimilitud(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
             @RequestBody Articulo articuloBase) {
         
         // Obtenemos todos los artículos del almacenamiento actual
@@ -148,7 +149,7 @@ public class BibliometriaController {
                 analisisSimilitudService.compararAbstractContraBase(articuloBase, baseDeDatos);
         
         // Registramos la búsqueda en el historial
-        storageManager.registrarBusqueda(articuloBase.getTitulo(), resultados.size());
+        storageManager.registrarBusqueda(usuarioId, articuloBase.getTitulo(), resultados.size());
         
         return ResponseEntity.ok(resultados);
     }
@@ -198,20 +199,41 @@ public class BibliometriaController {
     // --- Endpoints para Favoritos ---
 
     @PostMapping("/favoritos")
-    public ResponseEntity<Void> agregarFavorito(@RequestBody Articulo articulo) {
-        storageManager.agregarFavorito(articulo);
+    public ResponseEntity<Void> agregarFavorito(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
+            @RequestBody Articulo articulo) {
+        storageManager.agregarFavorito(usuarioId, articulo);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/favoritos/{articuloId}")
-    public ResponseEntity<Void> quitarFavorito(@PathVariable String articuloId) {
-        storageManager.quitarFavorito(articuloId);
+    public ResponseEntity<Void> quitarFavorito(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
+            @PathVariable String articuloId) {
+        storageManager.quitarFavorito(usuarioId, articuloId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/favoritos")
-    public List<Favorito> listarFavoritos() {
-        return storageManager.listarFavoritos();
+    public List<Favorito> listarFavoritos(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId) {
+        return storageManager.listarFavoritos(usuarioId);
+    }
+
+    // --- Endpoints para Historial ---
+
+    @GetMapping("/historial")
+    public List<HistorialBusqueda> listarHistorial(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId) {
+        return storageManager.listarHistorial(usuarioId);
+    }
+
+    @PostMapping("/historial")
+    public ResponseEntity<Void> registrarBusquedaHistorial(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
+            @RequestParam String query) {
+        storageManager.registrarBusqueda(usuarioId, query, 0); // Guardar con 0 resultados si es solo la query
+        return ResponseEntity.ok().build();
     }
 
     // --- Exportación Requerimiento 1 ---

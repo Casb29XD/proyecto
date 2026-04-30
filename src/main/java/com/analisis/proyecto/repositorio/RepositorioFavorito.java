@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface RepositorioFavorito extends MongoRepository<Favorito, String> {
-    Optional<Favorito> findByArticuloId(String articuloId);
+    Optional<Favorito> findByUsuarioIdAndArticuloId(String usuarioId, String articuloId);
+    java.util.List<Favorito> findByUsuarioId(String usuarioId);
 }
