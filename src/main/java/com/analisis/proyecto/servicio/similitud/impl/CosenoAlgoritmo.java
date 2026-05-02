@@ -12,6 +12,30 @@ import java.util.HashSet;
 /**
  * Implementación de la Similitud de Coseno.
  * Compara dos textos tratándolos como vectores de frecuencias de términos.
+ * 
+ * Fórmula Matemática:
+ * 
+ *         A · B
+ * cos(θ) = ──────────
+ *        ||A|| ||B||
+ *
+ * Donde:
+ * - A · B es el producto punto de los vectores de frecuencia.
+ * - ||A|| y ||B|| son las normas (magnitudes) de los vectores.
+ * 
+ * Diagrama Vectorial (Interpretación Geométrica):
+ * 
+ *       y (Término 2)
+ *       ^
+ *       |   Vector A (Texto 1)
+ *       |  /
+ *       | /  θ (Ángulo)
+ *       |/---------> Vector B (Texto 2)
+ *       +-----------------> x (Término 1)
+ * 
+ * - Si cos(θ) = 1 (θ = 0°): Textos idénticos en proporción.
+ * - Si cos(θ) = 0 (θ = 90°): Textos completamente diferentes.
+ *
  */
 @Component
 public class CosenoAlgoritmo implements SimilitudAlgoritmo {

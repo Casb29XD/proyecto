@@ -27,6 +27,17 @@ import java.util.stream.Collectors;
  * 5. Normalización: score ∈ [0, 1] dividiendo por el máximo alcanzable.
  * 6. Factor de longitud: penalización leve si los textos tienen tamaños muy
  *    distintos (simula la sensibilidad de BERT a la coherencia textual).
+ * 
+ * Diagrama de Ventana Deslizante (Atención Local):
+ * 
+ * Frase: "the generative ai model generates text"
+ * Ventana (W=2) para la palabra central "ai":
+ * 
+ * [ generative ] [ ai ] [ model ] [ generates ]
+ *   (i-1)         (i)     (i+1)     (i+2)
+ * 
+ * Contexto de "ai" = {generative: 1, model: 1, generates: 1}
+ *
  */
 @Component
 public class SimulacionEmbeddingBERT implements SimilitudAlgoritmo {

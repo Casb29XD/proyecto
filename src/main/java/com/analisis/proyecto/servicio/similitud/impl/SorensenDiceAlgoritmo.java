@@ -10,6 +10,26 @@ import java.util.Map;
  * Implementación del Coeficiente de Sørensen-Dice.
  * Mide la similitud entre dos conjuntos usando bigramas (pares de caracteres consecutivos).
  * Es una métrica clásica de similitud textual ampliamente utilizada en NLP y bibliometría.
+ * 
+ * Fórmula Matemática:
+ * 
+ *               2 * |A ∩ B|
+ * DSC(A, B) = ───────────────
+ *                |A| + |B|
+ * 
+ * Donde:
+ * - A y B son conjuntos de bigramas.
+ * - |A ∩ B| es el número de bigramas compartidos.
+ * 
+ * Diagrama de Bigramas:
+ * 
+ * Texto A: "noche" -> Bigramas: {no, oc, ch, he} (Total: 4)
+ * Texto B: "coche" -> Bigramas: {co, oc, ch, he} (Total: 4)
+ * 
+ * Intersección (A ∩ B): {oc, ch, he} (Total: 3)
+ * 
+ * DSC = (2 * 3) / (4 + 4) = 6 / 8 = 0.75 (75% de similitud)
+ *
  */
 @Component
 public class SorensenDiceAlgoritmo implements SimilitudAlgoritmo {

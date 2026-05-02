@@ -16,15 +16,19 @@ public class HistorialBusqueda {
     private String tituloArticuloAnalizado;
     private LocalDateTime fecha;
     private Integer totalResultados;
+    private String tipoAccion; // Ej. "BUSQUEDA" o "SIMILITUD"
+    private String detallesAdicionales; // JSON del articulo o la query original
 
     public HistorialBusqueda() {
         this.fecha = LocalDateTime.now();
     }
 
-    public HistorialBusqueda(String tituloArticuloAnalizado, Integer totalResultados) {
+    public HistorialBusqueda(String tipoAccion, String tituloArticuloAnalizado, Integer totalResultados, String detallesAdicionales) {
         this();
+        this.tipoAccion = tipoAccion;
         this.tituloArticuloAnalizado = tituloArticuloAnalizado;
         this.totalResultados = totalResultados;
+        this.detallesAdicionales = detallesAdicionales;
     }
 
     // Getters and Setters
@@ -44,4 +48,10 @@ public class HistorialBusqueda {
 
     public Integer getTotalResultados() { return totalResultados; }
     public void setTotalResultados(Integer totalResultados) { this.totalResultados = totalResultados; }
+
+    public String getTipoAccion() { return tipoAccion; }
+    public void setTipoAccion(String tipoAccion) { this.tipoAccion = tipoAccion; }
+
+    public String getDetallesAdicionales() { return detallesAdicionales; }
+    public void setDetallesAdicionales(String detallesAdicionales) { this.detallesAdicionales = detallesAdicionales; }
 }

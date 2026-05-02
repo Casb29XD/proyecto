@@ -23,6 +23,19 @@ import java.util.stream.Collectors;
  *    es la cantidad de documentos donde aparece t (0, 1 ó 2).
  * 5. Vector TF-IDF: w(t,d) = TF(t,d) × IDF(t)
  * 6. Similitud Coseno: sim(A,B) = (vA · vB) / (||vA|| × ||vB||)
+ * 
+ * Diagrama de Matriz de Embebidos (Espacio Vectorial):
+ * 
+ * Vocabulario   |  TF-IDF (Doc A)  |  TF-IDF (Doc B)
+ * --------------+------------------+-----------------
+ * "generative"  |       0.45       |       0.51
+ * "ai"          |       0.22       |       0.18
+ * "education"   |       0.68       |       0.00
+ * ...
+ * 
+ * Vector Doc A: [0.45, 0.22, 0.68, ...]
+ * Vector Doc B: [0.51, 0.18, 0.00, ...]
+ *
  */
 @Component
 public class SimulacionWord2Vec implements SimilitudAlgoritmo {

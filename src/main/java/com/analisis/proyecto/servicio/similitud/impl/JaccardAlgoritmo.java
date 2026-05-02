@@ -6,7 +6,31 @@ import org.springframework.stereotype.Component;
 
 /**
  * Implementación de la Similitud de Jaccard.
- * Mide el tamaño de la intersección dividido por el tamaño de la unión de dos conjuntos de caracteres.
+ * Mide el tamaño de la intersección dividido por el tamaño de la unión de dos conjuntos de caracteres o palabras.
+ * 
+ * Fórmula Matemática:
+ * 
+ *             |A ∩ B|
+ * J(A, B) = ───────────
+ *             |A ∪ B|
+ *
+ * Donde:
+ * - A ∩ B (Intersección): Elementos comunes en ambos textos.
+ * - A ∪ B (Unión): Total de elementos únicos presentes sumando ambos textos.
+ * 
+ * Diagrama de Conjuntos (Venn):
+ * 
+ *     Texto A        Texto B
+ *   .---------.    .---------.
+ *  /           \  /           \
+ * /   Solos     \/   Comunes   \
+ * \   en A      /\   (A ∩ B)   /
+ *  \           /  \           /
+ *   '---------'    '---------'
+ * 
+ * El Índice de Jaccard calcula qué porcentaje del total (A ∪ B)
+ * corresponde a la intersección (A ∩ B).
+ *
  */
 @Component
 public class JaccardAlgoritmo implements SimilitudAlgoritmo {

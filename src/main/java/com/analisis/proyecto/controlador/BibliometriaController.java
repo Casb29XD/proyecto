@@ -148,8 +148,16 @@ public class BibliometriaController {
         List<AnalisisSimilitudService.ResultadoComparacion> resultados = 
                 analisisSimilitudService.compararAbstractContraBase(articuloBase, baseDeDatos);
         
+        String jsonDetalles = "";
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            jsonDetalles = mapper.writeValueAsString(articuloBase);
+        } catch (Exception e) {
+            logger.error("Error serializando articuloBase", e);
+        }
+        
         // Registramos la búsqueda en el historial
-        storageManager.registrarBusqueda(usuarioId, articuloBase.getTitulo(), resultados.size());
+        storageManager.registrarBusqueda(usuarioId, "SIMILITUD", "Similitud: " + articuloBase.getTitulo(), resultados.size(), jsonDetalles);
         
         return ResponseEntity.ok(resultados);
     }
@@ -232,7 +240,7 @@ public class BibliometriaController {
     public ResponseEntity<Void> registrarBusquedaHistorial(
             @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
             @RequestParam String query) {
-        storageManager.registrarBusqueda(usuarioId, query, 0); // Guardar con 0 resultados si es solo la query
+        storageManager.registrarBusqueda(usuarioId, "BUSQUEDA", query, 0, query); // Guardar con 0 resultados si es solo la query
         return ResponseEntity.ok().build();
     }
 
@@ -289,9 +297,20 @@ public class BibliometriaController {
     }
 
     @GetMapping("/mineria/frecuencias/{articuloId}")
-    public ResponseEntity<MineriaTextoService.ResultadoMineria> extraerFrecuenciasPorArticulo(@PathVariable String articuloId) {
+    public ResponseEntity<MineriaTextoService.ResultadoMineria> extraerFrecuenciasPorArticulo(
+            @PathVariable String articuloId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId) {
         return storageManager.obtenerPorId(articuloId)
-                .map(articulo -> ResponseEntity.ok(mineriaTextoService.analizarFrecuenciasDocumento(articulo)))
+                .map(articulo -> {
+                    String jsonDetalles = "";
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        jsonDetalles = mapper.writeValueAsString(articulo);
+                    } catch (Exception e) {}
+                    storageManager.registrarBusqueda(usuarioId, "ANALISIS", "Minería: " + articulo.getTitulo(), 0, jsonDetalles);
+                    
+                    return ResponseEntity.ok(mineriaTextoService.analizarFrecuenciasDocumento(articulo));
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

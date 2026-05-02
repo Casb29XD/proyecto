@@ -107,6 +107,7 @@ Un panel interactivo ("Dashboard Bibliométrico") que ofrece perspectivas visual
 3. **Pestaña "Minería":** Haz clic en "Analizar Frecuencias" sobre un artículo específico para ver el breakdown de palabras conocidas vs. nuevas, además de métricas de impacto.
 4. **Pestaña "Agrupamiento":** Selecciona 3 o más artículos y presiona "Agrupar Selección". Observa cómo se dibujan los dendrogramas con sus respectivos métodos.
 5. **Pestaña "Dashboard Bibliométrico":** Navega para ver el mapa global, nube de palabras y tendencias temporales. Utiliza el botón "Exportar a PDF" en la esquina superior para generar un reporte del análisis visual.
+6. **Pestaña "Historial":** Revisa tus búsquedas, análisis de similitud y minería de textos pasados. **Haz clic en cualquier registro** para reconstruir los datos y re-ejecutar el análisis instantáneamente (Re-ejecución con 1 clic).
 
 ---
 

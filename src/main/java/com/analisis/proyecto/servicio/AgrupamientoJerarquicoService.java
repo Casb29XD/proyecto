@@ -10,6 +10,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Servicio encargado del Agrupamiento Jerárquico Aglomerativo (Bottom-Up).
+ * 
+ * Algoritmo Principal:
+ * 
+ * 1. Asignar cada artículo a su propio clúster (N clústeres iniciales).
+ * 2. Calcular la matriz de distancias D entre todos los clústeres.
+ * 3. Mientras haya más de 1 clúster:
+ *    a) Encontrar los clústeres A y B con la distancia mínima D(A, B).
+ *    b) Unir A y B en un nuevo clúster C = A ∪ B.
+ *    c) Actualizar la matriz de distancias para reflejar la distancia
+ *       entre C y el resto de los clústeres.
+ *
+ * 
+ * Métodos de Enlace (Linkage):
+ * 
+ * 1. Single Linkage (Mínimo):
+ *    D(A,B) = min { d(x,y) | x ∈ A, y ∈ B }
+ *    - Une por los vecinos más cercanos.
+ * 
+ * 2. Complete Linkage (Máximo):
+ *    D(A,B) = max { d(x,y) | x ∈ A, y ∈ B }
+ *    - Une considerando el peor caso (clústeres compactos).
+ * 
+ * 3. Average Linkage (UPGMA):
+ *    D(A,B) = 1 / (|A|*|B|) * sum(d(x,y))
+ *    - Promedio de todas las distancias, más balanceado.
+ *
+ */
 @Service
 public class AgrupamientoJerarquicoService {
 

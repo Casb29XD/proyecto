@@ -168,11 +168,11 @@ public class StorageManager {
         return inMemoryStorage.obtenerDuplicados();
     }
 
-    public void registrarBusqueda(String usuarioId, String titulo, int resultados) {
+    public void registrarBusqueda(String usuarioId, String tipoAccion, String titulo, int resultados, String detallesAdicionales) {
         checkConnectionLazily();
         if (!useFallback) {
             try {
-                HistorialBusqueda historial = new HistorialBusqueda(titulo, resultados);
+                HistorialBusqueda historial = new HistorialBusqueda(tipoAccion, titulo, resultados, detallesAdicionales);
                 historial.setUsuarioId(usuarioId);
                 mongoStorage.registrarBusqueda(historial);
             } catch (Exception e) {

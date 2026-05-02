@@ -6,6 +6,33 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio encargado de la extracción de frecuencias y descubrimiento de términos
+ * (Text Mining) utilizando NLP básico y métricas de precisión contextual.
+ * 
+ * Fórmula Matemática de Precisión Contextual:
+ * 
+ *                 Co-ocurrencias(w, ContextoBase)
+ * Precisión(w) = ─────────────────────────────────
+ *                       Frecuencia_Total(w)
+ * 
+ * Donde:
+ * - Co-ocurrencias(w, ContextoBase): Número de veces que la palabra "w" aparece 
+ *   en un documento que también contiene al menos una palabra de la categoría base.
+ * - Frecuencia_Total(w): Total de veces que "w" aparece en todos los documentos.
+ * 
+ * Diagrama de Extracción y Co-ocurrencia:
+ * 
+ * Abstract: "The generative models are trained using novel backpropagation..."
+ * 
+ * 1. Filtro Stopwords: [generative, models, trained, novel, backpropagation]
+ * 2. Match Base: "generative models" (Encontrado -> Incrementa Co-ocurrencias)
+ * 3. Nuevos Términos: "trained", "novel", "backpropagation"
+ * 
+ * Si "backpropagation" aparece 10 veces en total, pero 8 de esas veces
+ * aparece junto a términos base, su precisión es 0.8 (80% relevante al dominio).
+ *
+ */
 @Service
 public class MineriaTextoService {
 
