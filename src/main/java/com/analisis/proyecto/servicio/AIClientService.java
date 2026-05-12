@@ -85,7 +85,7 @@ public class AIClientService {
 
     private record SimilarityResponse(Double similarity) {
         private double normalizedScore() {
-            if (similarity == null || similarity.isNaN() || similarity.isInfinite()) {
+            if (similarity == null || Double.isNaN(similarity) || Double.isInfinite(similarity)) {
                 return 0.0;
             }
             return Math.max(0.0, Math.min(1.0, similarity));
