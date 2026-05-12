@@ -1,0 +1,6 @@
+fastapi==0.116.1
+uvicorn==0.35.0
+numpy==2.3.1
+scipy==1.16.0
+gensim==4.3.3
+sentence-transformers==3.0.1
