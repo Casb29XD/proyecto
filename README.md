@@ -12,6 +12,7 @@ El sistema sigue una arquitectura cliente-servidor con una base de datos documen
 
 - **Frontend:** Single Page Application construida con React, Vite, y TypeScript. Se comunica mediante REST APIs.
 - **Backend:** Aplicación robusta en Spring Boot (Java 17) que se encarga del procesamiento algorítmico, manejo de APIs externas y lógica de negocio.
+- **AI Engine:** Microservicio de inferencia en Python (FastAPI) con modelos reales (`KeyedVectors` y `Sentence-Transformers`) para similitud semántica.
 - **Base de Datos:** MongoDB, base de datos NoSQL elegida por su flexibilidad para almacenar documentos bibliográficos en formato JSON.
 
 ### Diagrama de Componentes
@@ -19,6 +20,7 @@ El sistema sigue una arquitectura cliente-servidor con una base de datos documen
 graph TD
     Client[Navegador / React Frontend] --> |REST API| API[Spring Boot Backend]
     API --> |Mapeo Entidades| Mongo[(MongoDB)]
+    API --> |HTTP/WebClient| AI[AI Engine FastAPI]
     API --> |Búsqueda HTTP| ExternalAPIs[APIs: arXiv, Semantic Scholar]
 ```
 
@@ -36,8 +38,9 @@ El proyecto cuenta con configuración lista para producción y desarrollo unific
    docker-compose up --build
    ```
 4. El sistema estará disponible en:
-   - Frontend: `http://localhost:5173`
-   - Backend API: `http://localhost:8080`
+    - Frontend: `http://localhost:5173`
+    - Backend API: `http://localhost:8080`
+    - AI Engine: `http://localhost:8000`
 
 ### Opción B: Instalación Local Manual
 **Requisitos:** Java 17+, Node.js 18+, MongoDB (en ejecución en `localhost:27017`).
@@ -47,6 +50,13 @@ El proyecto cuenta con configuración lista para producción y desarrollo unific
    # En la raíz del proyecto
    ./mvnw clean install
    ./mvnw spring-boot:run
+   ```
+
+3. **AI Engine (FastAPI):**
+   ```bash
+   cd ai-engine
+   pip install -r requirements.txt
+   uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
 
 2. **Frontend (React):**
@@ -113,6 +123,19 @@ Un panel interactivo ("Dashboard Bibliométrico") que ofrece perspectivas visual
 
 ## 6. Tecnologías y Librerías Destacadas
 - **Backend:** Java 17, Spring Boot 3, Spring Data MongoDB, Apache Maven.
+- **IA Real:** FastAPI, Gensim (`KeyedVectors`), Sentence-Transformers (SBERT).
 - **Frontend:** React 18, Vite, TypeScript, TailwindCSS, Lucide React (iconos), React Router.
 - **Visualización:** Recharts (Línea de tiempo, Treemap/Nube de palabras), Leaflet/React-Leaflet (Mapa geográfico interactivo), html2canvas + jspdf (Exportación PDF).
 - **Infraestructura:** Docker, Docker Compose, MongoDB.
+
+## 7. Variables de Entorno para IA
+
+- `SIMILARITY_AI_ENABLED` (default: `true`): activa/desactiva inferencia real.
+- `AI_SERVICE_URL` (default: `http://ai-engine:8000`): URL base del microservicio IA.
+- `AI_SERVICE_TIMEOUT_MS` (default: `2500`): timeout por solicitud de similitud.
+- `AI_SERVICE_MAX_RETRIES` (default: `1`): número de reintentos al fallar.
+- `AI_SERVICE_RETRY_DELAY_MS` (default: `250`): retardo entre reintentos.
+- `WORD2VEC_MODEL_NAME` (default: `glove-wiki-gigaword-50`): modelo KeyedVectors en `ai-engine`.
+- `SBERT_MODEL_NAME` (default: `paraphrase-multilingual-MiniLM-L12-v2`): modelo SBERT en `ai-engine`.
+
+Si el AI Engine no responde, los algoritmos de IA aplican fallback local para no interrumpir `/api/bibliometria/analizar-similitud`.
