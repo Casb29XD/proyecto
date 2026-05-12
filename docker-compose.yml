@@ -1,6 +1,25 @@
 version: '3.8'
 
 services:
+  ai-engine:
+    build:
+      context: ./ai-engine
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - WORD2VEC_MODEL_NAME=${WORD2VEC_MODEL_NAME:-glove-wiki-gigaword-50}
+      - SBERT_MODEL_NAME=${SBERT_MODEL_NAME:-paraphrase-multilingual-MiniLM-L12-v2}
+    volumes:
+      - model_cache:/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 90s
+
   # Backend Spring Boot (Java 17)
   app:
     build:
@@ -10,7 +29,13 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - AI_SERVICE_URL=${AI_SERVICE_URL:-http://ai-engine:8000}
+      - SIMILARITY_AI_ENABLED=${SIMILARITY_AI_ENABLED:-true}
     restart: unless-stopped
+    depends_on:
+      ai-engine:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
       interval: 30s
@@ -29,3 +54,6 @@ services:
       app:
         condition: service_started
     restart: unless-stopped
+
+volumes:
+  model_cache:
