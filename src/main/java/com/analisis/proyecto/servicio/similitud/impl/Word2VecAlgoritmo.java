@@ -7,14 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SimulacionWord2Vec implements SimilitudAlgoritmo {
+public class Word2VecAlgoritmo implements SimilitudAlgoritmo {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimulacionWord2Vec.class);
+    private static final Logger logger = LoggerFactory.getLogger(Word2VecAlgoritmo.class);
 
     private final AIClientService aiClientService;
     private final CosenoAlgoritmo fallbackCoseno;
 
-    public SimulacionWord2Vec(AIClientService aiClientService, CosenoAlgoritmo fallbackCoseno) {
+    public Word2VecAlgoritmo(AIClientService aiClientService, CosenoAlgoritmo fallbackCoseno) {
         this.aiClientService = aiClientService;
         this.fallbackCoseno = fallbackCoseno;
     }
@@ -34,7 +34,7 @@ public class SimulacionWord2Vec implements SimilitudAlgoritmo {
 
     @Override
     public String getNombreAlgoritmo() {
-        return "IA: Word2Vec (Real)";
+        return "IA: Word2Vec";
     }
 
     @Override

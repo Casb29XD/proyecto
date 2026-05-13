@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   ai-engine:
@@ -14,7 +13,7 @@ services:
       - model_cache:/models
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -32,12 +31,15 @@ services:
     environment:
       - AI_SERVICE_URL=${AI_SERVICE_URL:-http://ai-engine:8000}
       - SIMILARITY_AI_ENABLED=${SIMILARITY_AI_ENABLED:-true}
+      - SPRING_DATA_MONGODB_DATABASE=${MONGODB_DATABASE:-Documentos}
+      - MANAGEMENT_HEALTH_MONGO_ENABLED=false
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOWDETAILS=always
     restart: unless-stopped
     depends_on:
       ai-engine:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/liveness || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -52,7 +54,7 @@ services:
       - "80:80"
     depends_on:
       app:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

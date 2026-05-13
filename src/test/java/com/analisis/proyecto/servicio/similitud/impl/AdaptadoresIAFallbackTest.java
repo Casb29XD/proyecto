@@ -12,7 +12,7 @@ class AdaptadoresIAFallbackTest {
 
     @Test
     void word2vecDebeUsarIaCuandoEstaDisponible() {
-        SimulacionWord2Vec algoritmo = new SimulacionWord2Vec(
+        Word2VecAlgoritmo algoritmo = new Word2VecAlgoritmo(
                 new AIClientFake(Optional.of(0.82), Optional.empty()),
                 new CosenoAlgoritmo()
         );
@@ -24,7 +24,7 @@ class AdaptadoresIAFallbackTest {
     @Test
     void sbertDebeUsarFallbackCuandoIaNoDisponible() {
         JaccardAlgoritmo fallback = new JaccardAlgoritmo();
-        SimulacionEmbeddingBERT algoritmo = new SimulacionEmbeddingBERT(
+        SentenceBERTAlgoritmo algoritmo = new SentenceBERTAlgoritmo(
                 new AIClientFake(Optional.empty(), Optional.empty()),
                 fallback
         );

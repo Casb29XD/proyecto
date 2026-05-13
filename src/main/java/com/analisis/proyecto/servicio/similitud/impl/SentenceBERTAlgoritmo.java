@@ -7,14 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SimulacionEmbeddingBERT implements SimilitudAlgoritmo {
+public class SentenceBERTAlgoritmo implements SimilitudAlgoritmo {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimulacionEmbeddingBERT.class);
+    private static final Logger logger = LoggerFactory.getLogger(SentenceBERTAlgoritmo.class);
 
     private final AIClientService aiClientService;
     private final JaccardAlgoritmo fallbackJaccard;
 
-    public SimulacionEmbeddingBERT(AIClientService aiClientService, JaccardAlgoritmo fallbackJaccard) {
+    public SentenceBERTAlgoritmo(AIClientService aiClientService, JaccardAlgoritmo fallbackJaccard) {
         this.aiClientService = aiClientService;
         this.fallbackJaccard = fallbackJaccard;
     }
@@ -34,7 +34,7 @@ public class SimulacionEmbeddingBERT implements SimilitudAlgoritmo {
 
     @Override
     public String getNombreAlgoritmo() {
-        return "IA: Sentence-BERT (Real)";
+        return "IA: Sentence-BERT";
     }
 
     @Override
