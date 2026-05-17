@@ -65,10 +65,27 @@ public class ServicioApiArxiv {
                             autores.add(getElementValue(authorElement, "name"));
                         }
 
+                        String published = getElementValue(element, "published");
+                        int anio = 2023;
+                        if (!published.isEmpty() && published.length() >= 4) {
+                            try {
+                                anio = Integer.parseInt(published.substring(0, 4));
+                            } catch (NumberFormatException e) {
+                                // ignorar
+                            }
+                        }
+
+                        String revista = getElementValue(element, "arxiv:journal_ref");
+                        if (revista.isEmpty()) {
+                            revista = "arXiv Preprint";
+                        }
+                        
+                        String urlArticulo = getElementValue(element, "id");
+
                         // arXiv no devuelve siempre keywords de manera fácil, usamos lista vacía
                         List<String> palabrasClave = new ArrayList<>();
 
-                        Articulo articulo = new Articulo(titulo, autores, resumen, 0, "", "");
+                        Articulo articulo = new Articulo(titulo, autores, resumen, anio, revista, urlArticulo);
                         articulo.setOrigen("arXiv");
                         articulos.add(articulo);
                     }
