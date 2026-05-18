@@ -25,6 +25,7 @@ public class AnalisisSimilitudService {
             String idArticuloTarget,
             String tituloTarget,
             String resumenTarget,
+            List<String> autoresTarget,
             Map<String, Double> puntajesPorAlgoritmo
     ) {}
 
@@ -48,6 +49,7 @@ public class AnalisisSimilitudService {
                     candidato.getId(),
                     candidato.getTitulo(),
                     candidato.getResumen(),
+                    candidato.getAutores(),
                     puntajes
             ));
         }

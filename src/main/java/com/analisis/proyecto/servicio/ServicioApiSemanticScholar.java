@@ -30,7 +30,7 @@ public class ServicioApiSemanticScholar {
                 String queryEncoded = URLEncoder.encode(busqueda, StandardCharsets.UTF_8);
                 String url = "https://api.semanticscholar.org/graph/v1/paper/search?query=" + queryEncoded 
                            + "&limit=" + limite 
-                           + "&fields=title,authors,abstract,year,venue,url";
+                           + "&fields=title,authors,abstract,year,venue,url,publicationDate";
                 
                 System.out.println("Solicitando a Semantic Scholar (intento " + intento + "): " + url);
 
@@ -58,8 +58,14 @@ public class ServicioApiSemanticScholar {
                             
                             int anio = paperNode.has("year") && !paperNode.get("year").isNull() ? paperNode.get("year").asInt() : 2023;
                             String revista = paperNode.has("venue") && !paperNode.get("venue").isNull() ? paperNode.get("venue").asText() : "";
+                            String publicationDate = paperNode.has("publicationDate") && !paperNode.get("publicationDate").isNull() ? paperNode.get("publicationDate").asText() : "";
+                            
                             if (revista.isEmpty()) {
-                                revista = "Semantic Scholar Journal";
+                                revista = "Semantic Scholar Journal" + (!publicationDate.isEmpty() ? " (" + publicationDate + ")" : "");
+                            } else {
+                                if (!publicationDate.isEmpty() && !revista.contains(publicationDate)) {
+                                    revista = revista + " (" + publicationDate + ")";
+                                }
                             }
                             String urlArticulo = paperNode.has("url") && !paperNode.get("url").isNull() ? paperNode.get("url").asText() : "";
 

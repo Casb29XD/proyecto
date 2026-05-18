@@ -67,6 +67,8 @@ public class ServicioApiArxiv {
 
                         String published = getElementValue(element, "published");
                         int anio = 2023;
+                        String exactDate = "";
+                        
                         if (!published.isEmpty() && published.length() >= 4) {
                             try {
                                 anio = Integer.parseInt(published.substring(0, 4));
@@ -74,10 +76,14 @@ public class ServicioApiArxiv {
                                 // ignorar
                             }
                         }
+                        
+                        if (!published.isEmpty() && published.length() >= 10) {
+                            exactDate = published.substring(0, 10);
+                        }
 
                         String revista = getElementValue(element, "arxiv:journal_ref");
                         if (revista.isEmpty()) {
-                            revista = "arXiv Preprint";
+                            revista = "arXiv Preprint" + (!exactDate.isEmpty() ? " (" + exactDate + ")" : "");
                         }
                         
                         String urlArticulo = getElementValue(element, "id");
