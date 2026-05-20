@@ -169,6 +169,33 @@ public class BibliometriaController {
     }
 
     /**
+     * Requerimiento 2 (variante múltiple): Compara los artículos seleccionados solo entre sí.
+     * Se usa cuando el usuario selecciona 2 o más artículos.
+     */
+    @PostMapping("/analizar-similitud/multiple")
+    public ResponseEntity<List<AnalisisSimilitudService.ResultadoGrupo>> analizarSimilitudMultiple(
+            @RequestHeader(value = "X-User-Id", defaultValue = "anonymous") String usuarioId,
+            @RequestBody List<Articulo> articulosSeleccionados) {
+
+        if (articulosSeleccionados == null || articulosSeleccionados.size() < 2) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<AnalisisSimilitudService.ResultadoGrupo> resultados = analisisSimilitudService
+                .compararEntreSeleccionados(articulosSeleccionados);
+
+        storageManager.registrarBusqueda(
+                usuarioId,
+                "SIMILITUD_MULTIPLE",
+                "Similitud entre " + articulosSeleccionados.size() + " artículos seleccionados",
+                resultados.size(),
+                ""
+        );
+
+        return ResponseEntity.ok(resultados);
+    }
+
+    /**
      * Endpoint para obtener artículos con paginación (Soporta Fallback).
      */
     @GetMapping("/articulos")

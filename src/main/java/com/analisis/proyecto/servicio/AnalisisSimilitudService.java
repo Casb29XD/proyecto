@@ -30,6 +30,56 @@ public class AnalisisSimilitudService {
     ) {}
 
     /**
+     * Compara un conjunto de artículos seleccionados únicamente entre sí,
+     * generando todos los pares posibles (sin repetición) para cada artículo base.
+     * Devuelve, por cada artículo, su lista de comparaciones contra los demás.
+     */
+    public record ResultadoGrupo(
+            String idArticuloBase,
+            String tituloBase,
+            List<ResultadoComparacion> comparaciones
+    ) {}
+
+    public List<ResultadoGrupo> compararEntreSeleccionados(List<Articulo> seleccionados) {
+        List<ResultadoGrupo> grupos = new ArrayList<>();
+
+        for (int i = 0; i < seleccionados.size(); i++) {
+            Articulo base = seleccionados.get(i);
+            List<ResultadoComparacion> comparaciones = new ArrayList<>();
+
+            for (int j = 0; j < seleccionados.size(); j++) {
+                if (i == j) continue;
+                Articulo candidato = seleccionados.get(j);
+
+                Map<String, Double> puntajes = algoritmos.stream()
+                        .collect(Collectors.toMap(
+                                SimilitudAlgoritmo::getNombreAlgoritmo,
+                                alg -> alg.calcularSimilitud(
+                                        base.getResumen() != null ? base.getResumen() : "",
+                                        candidato.getResumen() != null ? candidato.getResumen() : ""
+                                )
+                        ));
+
+                comparaciones.add(new ResultadoComparacion(
+                        candidato.getId(),
+                        candidato.getTitulo(),
+                        candidato.getResumen(),
+                        candidato.getAutores(),
+                        puntajes
+                ));
+            }
+
+            grupos.add(new ResultadoGrupo(
+                    base.getId(),
+                    base.getTitulo(),
+                    comparaciones
+            ));
+        }
+
+        return grupos;
+    }
+
+    /**
      * Compara el abstract de un artículo base contra una lista de artículos candidatos usando todos los algoritmos disponibles.
      */
     public List<ResultadoComparacion> compararAbstractContraBase(Articulo base, List<Articulo> candidatos) {
